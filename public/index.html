@@ -1,1 +1,64 @@
+<head>
+  <title>Github test page</title>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+
+  <!-- Auth0Lock script -->
+  <script src="//cdn.auth0.com/js/lock/10.0/lock.min.js"></script>
+
+  <!-- Setting the right viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script>
+  $(document).on('ready', function() {
+    var lock = new Auth0Lock(CHANGE ME: 'CLIENT_ID', 'commenter.eu.auth0.com', {
+        auth: {
+            params: { scope: 'openid email' } //Details: https://auth0.com/docs/scopes
+        }
+    });
+
+    document.getElementById('btn-login').addEventListener('click', function() {
+      lock.show();
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', function() {
+      localStorage.removeItem('id_token');
+      window.location.href = "/index.html";
+    });
+
+    lock.on("authenticated", function(authResult) {
+      lock.getProfile(authResult.idToken, function(error, profile) {
+        if (error) {
+          // Handle error
+          return;
+        }
+
+        localStorage.setItem('id_token', authResult.idToken);
+        localStorage.setItem('profile', JSON.stringify(profile));
+        document.getElementById('name').textContent = profile.name;
+      });
+    });
+
+    //retrieve the profile:
+    var id_token = localStorage.getItem('id_token');
+    if (id_token) {
+      lock.getProfile(id_token, function (err, profile) {
+        if (err) {
+          return alert('There was an error getting the profile: ' + err.message);
+        }
+        document.getElementById('name').textContent = profile.name;
+      });
+    }
+  });
+  </script>
+</head>
+<body>
+
+
 Hi
+<p>Welcome: <span id="name"></span></p>
+
+<input id="btn-login" class="btn-login" type="submit" value="Login" />
+<input id="btn-logout" class="btn-logout" type="submit" value="Logout" />
+
+<div id="container"></div>
+
+</body>
